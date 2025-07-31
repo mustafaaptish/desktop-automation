@@ -43,18 +43,42 @@ class ClinkSteps: DesktopBaseStep() {
     fun `I should see the Dashboard screen`(screenName: String) {
             val isVisible = when (screenName.lowercase()) {
                 "dashboard" -> session().clinkDashboardPage.waitForDashboardVisible()
-                "1. network settings" -> session().clinkNetworkSettingsPage.waitForNetworkSettingsToBeVisible()
-                // Add more screen checks as needed
+                "network settings" -> session().clinkNetworkSettingsPage.waitForNetworkSettingsToBeVisible()
+                "survey settings" -> session().clinkSurveySettingsPage.waitForSurveySettingsToBeVisible()
                 else -> throw IllegalArgumentException("No visibility check defined for screen: $screenName")
             }
 
             Assert.assertTrue("$screenName screen is not visible", isVisible)
     }
 
+    @Then("I verify Network Settings labels are present")
+    fun `I verify Network Settings labels are present`() {
+        val page = session().clinkNetworkSettingsPage
+        val expectedLabels = listOf(
+            "Access Point Name",
+            "Username",
+            "Password",
+            "Radio Access Technology",
+            "Ethernet Information",
+            "Req",
+            "PHY Address",
+            "MAC Address",
+            "IP Address",
+            "Gateway",
+            "Subnet Mask",
+            "DNS",
+            "DHCP Lease(s)",
+            "Sockets"
+        )
+        expectedLabels.forEach { label ->
+            Assert.assertTrue("Label '$label' not found", page.isLabelPresent(label))
+        }
+    }
+
+
     @Then("I should see correct details")
     fun `I should see correct details`() {
         val dashboardPage = session().clinkDashboardPage
-//        println(dashboardPage.driver.pageSource)
 
         Assert.assertTrue("Dashboard not visible", dashboardPage.waitForDashboardVisible())
         Assert.assertTrue("Overview section missing", dashboardPage.verifyOverviewSection())
@@ -93,10 +117,33 @@ class ClinkSteps: DesktopBaseStep() {
     }
 
 
-    @Then("I navigate to Network Settings")
-    fun `I navigate to Network Settings`() {
-        val clinkNetworkSettingsPage = session().clinkNetworkSettingsPage
-        clinkNetworkSettingsPage.clickOnNetworkSettingsButton()
+    @Then("I navigate to (.*) page$")
+    fun `I navigate to settings page`(page: String) {
+        when (page.trim().lowercase()) {
+            "network settings" -> session().clinkNetworkSettingsPage.clickOnNetworkSettingsButton()
+            "survey settings" -> session().clinkNetworkSettingsPage.clickOnSurveySettingsButton()
+            else -> throw IllegalArgumentException("Unknown settings page: $page")
+        }
+    }
+
+    @Then("I navigate to (.*) via navigation bar$")
+    fun `I navigate to tab via navigation bar`(tab: String) {
+        val page = session().clinkNetworkSettingsPage
+
+        when (tab.trim().lowercase()) {
+            "dashboard" -> page.clickOnDashboardTab()
+            "network settings" -> page.clickOnNetworkSettingsTab()
+            "survey settings" -> page.clickOnSurveySettingsTab()
+            "lane setup" -> page.clickOnLaneSetupTab()
+            "advanced" -> page.clickOnAdvancedTab()
+            else -> throw IllegalArgumentException("Unknown tab: $tab")
+        }
+    }
+
+    @Then("I can disconnect the device$")
+    fun `I can disconnect the device`() {
+        val page = session().clinkNetworkSettingsPage
+        page.clickOnDisconnectDeviceButton()
     }
 
 
@@ -151,6 +198,45 @@ class ClinkSteps: DesktopBaseStep() {
         Assert.assertEquals("Domain name mismatch", session().enteredDomain, actualDomain)
         Assert.assertEquals("Username mismatch", session().enteredUsername, actualUsername)
         Assert.assertEquals("Password mismatch", session().enteredPassword, actualPassword)
+    }
+
+    @Then("I can update survey settings details")
+    fun `I can update survey settings details`() {
+        val page = session().clinkSurveySettingsPage
+        val classSchemes = listOf("DIR2", "EUR6")
+        val selectedScheme  = classSchemes.random()
+        val checkboxStates = listOf(true, false).random()
+        page
+            .setAllSurveyCheckboxes(checked = checkboxStates)
+            .selectClassSchemeFromDropdown(selectedScheme )
+            .clickSave()
+
+        session().expectedClassScheme = selectedScheme
+        session().expectedCheckboxesChecked = checkboxStates
+    }
+
+    @Then("I refresh the page")
+    fun `I refresh the page`() {
+        val page = session().clinkSurveySettingsPage
+        page.clickOnRefreshButton()
+    }
+
+    @Then("I verify changes are persistent")
+    fun `I verify changes are persistent`() {
+        val page = session().clinkSurveySettingsPage
+        Thread.sleep(1000)
+        // Verify class scheme
+        session().expectedClassScheme?.let { expectedScheme ->
+            val isClassSchemePersisted = page.verifySelectedClassScheme(expectedScheme)
+            Assert.assertTrue("Class scheme is not persisted: expected '$expectedScheme'", isClassSchemePersisted)
+        }
+
+        // Verify all checkboxes are in the expected state
+        val expectedCheckboxState = session().expectedCheckboxesChecked
+        page.surveyCheckboxIds.forEach { id ->
+            val isCheckboxStateCorrect = page.verifyCheckboxState(id, expectedCheckboxState)
+            Assert.assertTrue("Checkbox $id is not in expected state: expected $expectedCheckboxState", isCheckboxStateCorrect)
+        }
     }
 
 

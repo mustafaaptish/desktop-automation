@@ -8,10 +8,29 @@ import org.openqa.selenium.support.ui.WebDriverWait
 
 class ClinkNetworkSettingsPage (val driver: WindowsDriver<WebElement>) : BasePage(driver) {
 
+    private val networkSettingsTab: WebElement
+        get() = driver.findElementByAccessibilityId("DeviceTabNetworkSettings")
+
+    private val surveySettingsTab: WebElement
+        get() = driver.findElementByAccessibilityId("DeviceTabSurveySettings")
+
+    private val advancedTab: WebElement
+        get() = driver.findElementByAccessibilityId("DeviceTabAdvanced")
+
+    private val laneSetupTab: WebElement
+        get() = driver.findElementByAccessibilityId("DeviceTabLanesSetup")
+
+    private val disconnectDeviceButton: WebElement
+        get() = driver.findElementByAccessibilityId("disconnectBtn")
+
+
     private val networkSettingsText = By.name("Network Settings")
     //    private val networkSettingsButton = driver.findElementByName("1. Network Settings")
     private val networkSettingsButton: WebElement
         get() = driver.findElementByName("1. Network Settings")
+
+    private val surveySettingsButton: WebElement
+        get() = driver.findElementByName("2. Survey Settings")
 
     private val accessPointNameInput: WebElement
         get() = driver.findElementByAccessibilityId("accessPoint_name")
@@ -31,6 +50,35 @@ class ClinkNetworkSettingsPage (val driver: WindowsDriver<WebElement>) : BasePag
     private val dashBoardTab: WebElement
         get() = driver.findElementByAccessibilityId("DeviceTabDashboard")
 
+    fun clickOnNetworkSettingsTab(): ClinkNetworkSettingsPage {
+        networkSettingsTab.click()
+        println("Clicked on 'Network Settings' tab")
+        return this
+    }
+
+    fun clickOnDisconnectDeviceButton(): ClinkNetworkSettingsPage {
+        disconnectDeviceButton.click()
+        println("Clicked on 'Disconnect Device' button")
+        return this
+    }
+
+    fun clickOnSurveySettingsTab(): ClinkNetworkSettingsPage {
+        surveySettingsTab.click()
+        println("Clicked on 'Survey Settings' tab")
+        return this
+    }
+
+    fun clickOnAdvancedTab(): ClinkNetworkSettingsPage {
+        advancedTab.click()
+        println("Clicked on 'Advanced' tab")
+        return this
+    }
+
+    fun clickOnLaneSetupTab(): ClinkNetworkSettingsPage {
+        laneSetupTab.click()
+        println("Clicked on 'Lane(s) Setup' tab")
+        return this
+    }
 
     fun getAccessPointName(): String {
         return getTextFromInput(accessPointNameInput)
@@ -80,6 +128,16 @@ class ClinkNetworkSettingsPage (val driver: WindowsDriver<WebElement>) : BasePag
         return this
     }
 
+    fun isLabelPresent(labelText: String): Boolean {
+        return try {
+            driver.findElement(By.name(labelText))
+            println("Label '$labelText' is present")
+            true
+        } catch (e: Exception) {
+            println("Label '$labelText' is NOT present")
+            false
+        }
+    }
 
     fun waitForNetworkSettingsToBeVisible(timeoutSeconds: Long = 30): Boolean {
         val wait = WebDriverWait(driver, timeoutSeconds)
@@ -96,6 +154,11 @@ class ClinkNetworkSettingsPage (val driver: WindowsDriver<WebElement>) : BasePag
     fun clickOnNetworkSettingsButton() {
         networkSettingsButton.click()
         println("Clicked on 'Network Settings' button")
+    }
+
+    fun clickOnSurveySettingsButton() {
+        surveySettingsButton.click()
+        println("Clicked on 'Survey Settings' button")
     }
 
 

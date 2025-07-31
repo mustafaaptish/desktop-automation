@@ -23,7 +23,7 @@ open class BasePage(private val driver: WindowsDriver<WebElement>) {
         element.sendKeys(Keys.CONTROL, "a")
         element.sendKeys(Keys.DELETE)
         element.sendKeys(text)
-        println("Entered: '$text'")
+        println("Entered: $text")
     }
 
      fun getTextFromInput(element: WebElement): String {

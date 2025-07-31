@@ -1,10 +1,7 @@
 package insight.steps
 
-import insight.pages.ClinkDashboardPage
-import insight.pages.ClinkLoginPage
-import insight.pages.ClinkNetworkSettingsPage
-import insight.pages.NotepadPage
 import insight.drivers.DesktopDriver
+import insight.pages.*
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import org.junit.Assert
@@ -28,11 +25,13 @@ class NotepadSteps: DesktopBaseStep() {
                 val clinkPage = ClinkLoginPage(driver)
                 val dashboardPage = ClinkDashboardPage(driver)
                 val clinkNetworkSettingsPage = ClinkNetworkSettingsPage(driver)
+                val clinkSurveySettingsPage = ClinkSurveySettingsPage(driver)
 
                 this.clinkPage = clinkPage
                 session().clinkLoginPage = clinkPage
                 session().clinkDashboardPage = dashboardPage
                 session().clinkNetworkSettingsPage = clinkNetworkSettingsPage
+                session().clinkSurveySettingsPage = clinkSurveySettingsPage
             }
             else -> throw IllegalArgumentException("Unsupported app: $appName")
         }
