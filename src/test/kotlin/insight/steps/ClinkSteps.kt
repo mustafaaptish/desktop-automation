@@ -2,9 +2,12 @@ package insight.steps
 
 import insight.utilities.AuthTokenFetcher
 import insight.utilities.Credentials
+import insight.utilities.DesktopUtils
+import insight.utilities.FileUtils
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
 import org.junit.Assert
+import java.lang.AssertionError
 
 class ClinkSteps: DesktopBaseStep() {
 //    private lateinit var clinkPage: ClinkPage
@@ -237,6 +240,35 @@ class ClinkSteps: DesktopBaseStep() {
             val isCheckboxStateCorrect = page.verifyCheckboxState(id, expectedCheckboxState)
             Assert.assertTrue("Checkbox $id is not in expected state: expected $expectedCheckboxState", isCheckboxStateCorrect)
         }
+    }
+
+    @Then("I can reboot the device")
+    fun `I can reboot the device`() {
+        val page = session().clinkAdvancedPage
+        page.clickOnRebootDeviceButton()
+    }
+
+    @Then("I can export device configuration")
+    fun `I can export device configuration`() {
+        val page = session().clinkAdvancedPage
+        page
+            .clickOnExportDeviceConfigurationButton()
+            .waitForExportLoaderToDisappear()
+
+        val saved = DesktopUtils.clickSaveAndConfirmExport()
+        if (!saved) {
+            throw AssertionError("Save button could not be clicked")
+        }
+    }
+
+    @Then("I verify the exported configuration file is valid")
+    fun `I verify verify exported config file`() {
+        val downloadDir = System.getProperty("download.dir") ?: FileUtils.DOWNLOAD_LOCATION
+        println("download location is: $downloadDir")
+        val externalIdentifier = "mbLeHR3g"
+
+        val result = FileUtils.verifyExportedConfigFile(downloadDir, externalIdentifier, "Connex")
+        assert(result) { "Exported XML configuration file validation failed" }
     }
 
 

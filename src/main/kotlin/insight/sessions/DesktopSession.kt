@@ -12,6 +12,7 @@ class DesktopSession {
     lateinit var clinkDashboardPage: ClinkDashboardPage
     lateinit var clinkNetworkSettingsPage: ClinkNetworkSettingsPage
     lateinit var clinkSurveySettingsPage: ClinkSurveySettingsPage
+    lateinit var clinkAdvancedPage: ClinkAdvancedPage
 
     var enteredText: String? = null
     var enteredDomain: String? = null

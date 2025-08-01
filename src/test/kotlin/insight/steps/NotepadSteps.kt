@@ -26,12 +26,14 @@ class NotepadSteps: DesktopBaseStep() {
                 val dashboardPage = ClinkDashboardPage(driver)
                 val clinkNetworkSettingsPage = ClinkNetworkSettingsPage(driver)
                 val clinkSurveySettingsPage = ClinkSurveySettingsPage(driver)
+                val clinkAdvancedPage = ClinkAdvancedPage(driver)
 
                 this.clinkPage = clinkPage
                 session().clinkLoginPage = clinkPage
                 session().clinkDashboardPage = dashboardPage
                 session().clinkNetworkSettingsPage = clinkNetworkSettingsPage
                 session().clinkSurveySettingsPage = clinkSurveySettingsPage
+                session().clinkAdvancedPage = clinkAdvancedPage
             }
             else -> throw IllegalArgumentException("Unsupported app: $appName")
         }
