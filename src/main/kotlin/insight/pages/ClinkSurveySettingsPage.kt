@@ -3,6 +3,7 @@ package insight.pages
 import io.appium.java_client.windows.WindowsDriver
 import org.openqa.selenium.By
 import org.openqa.selenium.Keys
+import org.openqa.selenium.TimeoutException
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
@@ -21,6 +22,24 @@ class ClinkSurveySettingsPage (val driver: WindowsDriver<WebElement>) : BasePage
     private val additionalClassSchemeDropdown: WebElement
         get() = driver.findElementByAccessibilityId("additionalClassScheme")
 
+    private val returnButton: WebElement
+        get() = driver.findElementByName("Return")
+
+    fun dismissWarningIfPresent(): ClinkSurveySettingsPage {
+        try {
+            val wait = WebDriverWait(driver, 2) // short timeout to avoid long delays
+            val returnBtn = wait.until(ExpectedConditions.presenceOfElementLocated(By.name("Return")))
+            if (returnBtn.isDisplayed) {
+                returnBtn.click()
+                println("Warning dialog detected and 'Return' clicked.")
+            }
+        } catch (e: TimeoutException) {
+            println("No warning dialog appeared.")
+        } catch (e: Exception) {
+            println("Unexpected error while checking for 'Return' button: ${e.message}")
+        }
+        return this
+    }
 
     fun clickOnRefreshButton() : ClinkSurveySettingsPage {
         refreshButton.click()
@@ -83,19 +102,65 @@ class ClinkSurveySettingsPage (val driver: WindowsDriver<WebElement>) : BasePage
         "vehicleRecord_speed"
     )
 
+//    fun setAllSurveyCheckboxes(checked: Boolean): ClinkSurveySettingsPage {
+//        for (id in surveyCheckboxIds) {
+//            val checkbox = checkboxById(id)
+//            val isChecked = checkbox.isSelected
+//            if (isChecked != checked) {
+//                checkbox.click()
+//                println("${if (checked) "Checked" else "Unchecked"} checkbox: $id")
+//            } else {
+//                println("Checkbox $id already ${if (checked) "checked" else "unchecked"}")
+//            }
+//        }
+//        return this
+//    }
+
     fun setAllSurveyCheckboxes(checked: Boolean): ClinkSurveySettingsPage {
+        Thread.sleep(500) // Allow UI to settle before starting
         for (id in surveyCheckboxIds) {
-            val checkbox = checkboxById(id)
-            val isChecked = checkbox.isSelected
-            if (isChecked != checked) {
+            val maxRetries = 3
+            var attempt = 0
+            var success = false
+
+            while (attempt < maxRetries) {
+                val checkbox = checkboxById(id)
+
+                if (checkbox.isSelected != checked) {
+                    checkbox.click()
+                    Thread.sleep(300) // Allow flicker to finish
+                }
+
+                // Re-fetch and double check
+                val finalState = checkboxById(id).isSelected
+                if (finalState == checked) {
+                    println("Checkbox $id successfully set to: $checked")
+                    success = true
+                    break
+                }
+
+                println("Retrying checkbox $id. Attempt: ${attempt + 1}")
+                attempt++
+                Thread.sleep(200) // Allow state to settle again before retry
+            }
+
+            if (!success) {
+                // Last effort: click once more and final check
+                val checkbox = checkboxById(id)
                 checkbox.click()
-                println("${if (checked) "Checked" else "Unchecked"} checkbox: $id")
-            } else {
-                println("Checkbox $id already ${if (checked) "checked" else "unchecked"}")
+                Thread.sleep(300)
+                val finalState = checkboxById(id).isSelected
+                if (finalState != checked) {
+                    throw AssertionError("Checkbox $id could not be reliably set to $checked after extra attempt.")
+                } else {
+                    println("Checkbox $id recovered after extra attempt.")
+                }
             }
         }
+
         return this
     }
+
 
     /**
      // Survey Settings locators

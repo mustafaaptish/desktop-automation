@@ -16,22 +16,22 @@ object FileUtils {
         // Construct the expected filename pattern
         val fileNamePrefix = "clink_config_export_$externalIdentifier"
 
-        // Find the matching file (assuming one .xml file starting with this prefix)
+        // Find the matching file
         val file = File(downloadDir)
             .listFiles { dir, name -> name.startsWith(fileNamePrefix) && name.endsWith(".xml") }
             ?.firstOrNull()
             ?: throw AssertionError("Exported config file starting with $fileNamePrefix not found in $downloadDir")
 
         println("Found export file: ${file.absolutePath}")
-        // Print the raw XML content for debugging
+
         val content = file.readText(Charsets.UTF_8)
         println("XML file content:\n$content")
-        // Parse XML
+
         val docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val doc = docBuilder.parse(file)
         doc.documentElement.normalize()
 
-        // Check root element name and attribute "Device"
+
         val rootElement = doc.documentElement
         if (rootElement.nodeName != "Configuration") {
             throw AssertionError("Root element is not <Configuration>, but <${rootElement.nodeName}>")

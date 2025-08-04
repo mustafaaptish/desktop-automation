@@ -203,16 +203,17 @@ class ClinkSteps: DesktopBaseStep() {
         Assert.assertEquals("Password mismatch", session().enteredPassword, actualPassword)
     }
 
-    @Then("I can update survey settings details")
-    fun `I can update survey settings details`() {
+    @Then("I can update survey settings details with checkboxes set to (.*)$")
+    fun `I can update survey settings details`(checkBox: String) {
         val page = session().clinkSurveySettingsPage
         val classSchemes = listOf("DIR2", "EUR6")
         val selectedScheme  = classSchemes.random()
-        val checkboxStates = listOf(true, false).random()
-        page
+        val checkboxStates = checkBox.toBooleanStrict()
+        page.selectClassSchemeFromDropdown(selectedScheme )
             .setAllSurveyCheckboxes(checked = checkboxStates)
-            .selectClassSchemeFromDropdown(selectedScheme )
-            .clickSave()
+
+            .clickSave().
+            dismissWarningIfPresent()
 
         session().expectedClassScheme = selectedScheme
         session().expectedCheckboxesChecked = checkboxStates

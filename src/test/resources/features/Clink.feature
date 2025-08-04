@@ -1,6 +1,57 @@
 @desktop
 
-Feature: Clink Dashboard
+Feature: C-Link actions
+
+
+  Scenario Outline: User can update C-Link settings
+    Given I launch CLINK application
+    And I click connect to a device
+    When I enter my Insight Token and login
+    And I select a device from the dropdown
+    Then I should see the Dashboard screen
+    And I navigate to Network Settings page
+    Then I should see the Network Settings screen
+    Then I verify Network Settings labels are present
+    And I navigate to Dashboard via navigation bar
+    And I navigate to Survey Settings page
+    Then I should see the Survey Settings screen
+    And I can update survey settings details with checkboxes set to <checkBoxState>
+    Then I refresh the page
+    Then I verify changes are persistent
+    And I navigate to Lane Setup via navigation bar
+    And I navigate to Advanced via navigation bar
+#      And I can reboot the device
+    And I can export device configuration
+    Then I verify the exported configuration file is valid
+    Then I can disconnect the device
+
+    Examples:
+      |checkBoxState|
+      |true|
+      |false|
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   Scenario: The dashboard screen must include the Device Status
     Given I launch CLINK application
@@ -43,30 +94,35 @@ Feature: Clink Dashboard
     Then I should see the Dashboard screen
     And I navigate to Survey Settings page
     Then I should see the Survey Settings screen
-    And I can update survey settings details
+#    And I can update survey settings details
     Then I refresh the page
     Then I verify changes are persistent
 
 
 
-    Scenario: Complete scenario
+    Scenario Outline: Complete scenario
       Given I launch CLINK application
       And I click connect to a device
       When I enter my Insight Token and login
       And I select a device from the dropdown
       Then I should see the Dashboard screen
       And I navigate to Network Settings page
-#      Then I should see the Network Settings screen
-#      Then I verify Network Settings labels are present
-#      And I navigate to Dashboard via navigation bar
-#      And I navigate to Survey Settings page
-#      Then I should see the Survey Settings screen
-#      And I can update survey settings details
-#      Then I refresh the page
-#      Then I verify changes are persistent
-#      And I navigate to Lane Setup via navigation bar
+      Then I should see the Network Settings screen
+      Then I verify Network Settings labels are present
+      And I navigate to Dashboard via navigation bar
+      And I navigate to Survey Settings page
+      Then I should see the Survey Settings screen
+    And I can update survey settings details with checkboxes set to <checkBoxState>
+      Then I refresh the page
+      Then I verify changes are persistent
+      And I navigate to Lane Setup via navigation bar
       And I navigate to Advanced via navigation bar
 #      And I can reboot the device
       And I can export device configuration
   Then I verify the exported configuration file is valid
-#      Then I can disconnect the device
+      Then I can disconnect the device
+
+  Examples:
+      |checkBoxState|
+      |true|
+      |false|
