@@ -32,7 +32,7 @@ class ClinkSteps: DesktopBaseStep() {
     @When("I enter my Insight Token and login")
         fun `I enter my Insight Token and login`() {
         val page = session().clinkLoginPage
-        // Obtain token from API
+
         val token = AuthTokenFetcher.getToken(Credentials.username, Credentials.password).token
 
         page.
@@ -125,6 +125,7 @@ class ClinkSteps: DesktopBaseStep() {
         when (page.trim().lowercase()) {
             "network settings" -> session().clinkNetworkSettingsPage.clickOnNetworkSettingsButton()
             "survey settings" -> session().clinkNetworkSettingsPage.clickOnSurveySettingsButton()
+                "advanced" -> session().clinkNetworkSettingsPage.clickOnAdvancedButton()
             else -> throw IllegalArgumentException("Unknown settings page: $page")
         }
     }

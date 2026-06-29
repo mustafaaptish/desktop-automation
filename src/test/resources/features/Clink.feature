@@ -3,7 +3,7 @@
 Feature: C-Link actions
 
 
-  Scenario Outline: User can update C-Link settings
+  Scenario Outline: User can update Survey Settings
     Given I launch CLINK application
     And I click connect to a device
     When I enter my Insight Token and login
@@ -19,47 +19,85 @@ Feature: C-Link actions
     Then I refresh the page
     Then I verify changes are persistent
     And I navigate to Lane Setup via navigation bar
-    And I navigate to Advanced via navigation bar
-#      And I can reboot the device
-    And I can export device configuration
-    Then I verify the exported configuration file is valid
     Then I can disconnect the device
 
     Examples:
       |checkBoxState|
-      |true|
       |false|
+      |true|
 
 
+  Scenario: User can export device configuration
+    Given I launch CLINK application
+    And I click connect to a device
+    When I enter my Insight Token and login
+    And I select a device from the dropdown
+    Then I should see the Dashboard screen
+    And I navigate to Advanced page
+    And I can export device configuration
+    Then I verify the exported configuration file is valid
+    Then I can disconnect the device
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  Scenario: The dashboard screen must include the Device Status
+  Scenario: User should be able to login using username and password
     Given I launch CLINK application
     And I click connect to a device
     When I enter my Clink credentials and login
     And I select a device from the dropdown
     Then I should see the Dashboard screen
     And I should see correct details
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#    And I navigate to Advanced via navigation bar
+#      And I can reboot the device
+#    And I can export device configuration
+#    Then I verify the exported configuration file is valid
+#    Then I can disconnect the device
+
+
+
+
+
+
+
 #    And I close the application
 
   Scenario: The dashboard screen must include series of other actions that can be performed

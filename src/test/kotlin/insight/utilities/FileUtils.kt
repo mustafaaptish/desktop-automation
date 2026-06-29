@@ -13,7 +13,7 @@ object FileUtils {
         externalIdentifier: String,
         expectedDeviceName: String
     ): Boolean {
-        // Construct the expected filename pattern
+
         val fileNamePrefix = "clink_config_export_$externalIdentifier"
 
         // Find the matching file

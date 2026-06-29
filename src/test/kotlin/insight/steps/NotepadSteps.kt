@@ -9,6 +9,7 @@ import org.junit.Assert
 class NotepadSteps: DesktopBaseStep() {
     private lateinit var notepadPage: NotepadPage
     private lateinit var clinkPage: ClinkLoginPage
+    private lateinit var msTeamsPage: MsTeamsPage
 
 
 
@@ -35,12 +36,16 @@ class NotepadSteps: DesktopBaseStep() {
                 session().clinkSurveySettingsPage = clinkSurveySettingsPage
                 session().clinkAdvancedPage = clinkAdvancedPage
             }
+            "ms teams" -> {
+                val msTeamsPage = MsTeamsPage(driver)
+                session().msTeamsPage = msTeamsPage
+            }
             else -> throw IllegalArgumentException("Unsupported app: $appName")
         }
     }
 
 
-    @Then("I type (.*)$")
+    @Then("I type (.*) in notepad$")
     fun `I type something`(text: String) {
         notepadPage.enterText(text)
         session().enteredText = text

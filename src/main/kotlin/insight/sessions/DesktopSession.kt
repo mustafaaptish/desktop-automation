@@ -13,6 +13,7 @@ class DesktopSession {
     lateinit var clinkNetworkSettingsPage: ClinkNetworkSettingsPage
     lateinit var clinkSurveySettingsPage: ClinkSurveySettingsPage
     lateinit var clinkAdvancedPage: ClinkAdvancedPage
+    lateinit var msTeamsPage: MsTeamsPage
 
     var enteredText: String? = null
     var enteredDomain: String? = null
@@ -21,5 +22,4 @@ class DesktopSession {
     var isFileSaved: Boolean = false
     var expectedClassScheme: String? = null
     var expectedCheckboxesChecked: Boolean = false
-    // Add more properties as needed
 }

@@ -29,6 +29,9 @@ class ClinkNetworkSettingsPage (val driver: WindowsDriver<WebElement>) : BasePag
     private val networkSettingsButton: WebElement
         get() = driver.findElementByName("1. Network Settings")
 
+    private val advancedButton: WebElement
+        get() = driver.findElementByAccessibilityId("AdvancedButton")
+
     private val surveySettingsButton: WebElement
         get() = driver.findElementByName("2. Survey Settings")
 
@@ -56,6 +59,12 @@ class ClinkNetworkSettingsPage (val driver: WindowsDriver<WebElement>) : BasePag
         return this
     }
 
+    fun clickOnAdvancedButton(): ClinkNetworkSettingsPage {
+        advancedButton.click()
+        println("Clicked on 'Advanced' tab")
+        return this
+    }
+
     fun clickOnDisconnectDeviceButton(): ClinkNetworkSettingsPage {
         disconnectDeviceButton.click()
         println("Clicked on 'Disconnect Device' button")
@@ -69,7 +78,7 @@ class ClinkNetworkSettingsPage (val driver: WindowsDriver<WebElement>) : BasePag
     }
 
     fun clickOnAdvancedTab(): ClinkNetworkSettingsPage {
-        advancedTab.click()
+        advancedButton.click()
         println("Clicked on 'Advanced' tab")
         return this
     }
