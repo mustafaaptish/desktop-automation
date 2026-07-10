@@ -14,13 +14,26 @@ class MsTeamsPage(private val driver: WindowsDriver<WebElement>) : BasePage(driv
     // AutomationId prefix is stable across the UUID suffix
     private val messageInputById: By = By.xpath("//*[starts-with(@AutomationId, 'new-message-')]")
 
-    private val myChatItem: WebElement
-        get() = findElements(By.xpath("//*[contains(@Name, 'Chat Mustafa')]"))
+    private fun findMyChatItem(): WebElement? =
+        findElements(By.xpath("//*[contains(@Name, 'Chat Mustafa')]"))
             .firstOrNull { it.getAttribute("ControlType")?.contains("TreeItem") == true }
-            ?: throw NoSuchElementException("Could not find own chat item in Teams sidebar")
+
+    // Teams can take a long time to render the sidebar after launch, so poll instead of a one-shot lookup
+    private fun waitForMyChatItem(timeoutSeconds: Long = 60): WebElement {
+        val pollMs = 1000L
+        val deadline = System.currentTimeMillis() + (timeoutSeconds * 1000)
+
+        while (System.currentTimeMillis() < deadline) {
+            val chatItem = runCatching { findMyChatItem() }.getOrNull()
+            if (chatItem != null) return chatItem
+            WaitUtils.waitForMilliSec(pollMs)
+        }
+
+        throw NoSuchElementException("Could not find own chat item in Teams sidebar within ${timeoutSeconds}s")
+    }
 
     fun clickOnMyChat(): MsTeamsPage {
-        myChatItem.click()
+        waitForMyChatItem().click()
         logInfo("Clicked on own chat")
         waitForMessageInput() // wait for chat pane to fully load before returning
         return this
