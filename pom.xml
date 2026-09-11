@@ -12,19 +12,19 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <kotlin.version>1.5.10</kotlin.version>
+        <kotlin.version>1.5.31</kotlin.version>
         <cucumber.version>7.20.1</cucumber.version>
         <selenium.version>3.141.59</selenium.version>
+        <jackson.version>2.16.2</jackson.version>
+        <!-- Runner class executed by surefire; override with -Drunner=FailedRunner to rerun failures -->
+        <runner>Runner</runner>
+        <!-- Override with -Dcucumber.filter.tags=@desktop to filter scenarios -->
+        <cucumber.filter.tags></cucumber.filter.tags>
+        <!-- Override with -DEnvironment=functionaltest -->
+        <Environment></Environment>
     </properties>
 
     <dependencies>
-
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
-            <version>5.3.1</version> <!-- or latest -->
-            <scope>test</scope>
-        </dependency>
 
         <!-- Kotlin Standard Library -->
         <dependency>
@@ -46,7 +46,60 @@
             <artifactId>selenium-java</artifactId>
             <version>${selenium.version}</version>
         </dependency>
-        <!-- Removed explicit selenium-remote-driver since 3.141.59 should include it -->
+
+        <!-- Owner - typed property/config loading -->
+        <dependency>
+            <groupId>org.aeonbits.owner</groupId>
+            <artifactId>owner</artifactId>
+            <version>1.0.12</version>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.16</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.16</version>
+        </dependency>
+
+        <!-- Jackson for JSON (de)serialization of API responses -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- REST client for auth token fetching -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>5.3.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JNA - direct Win32 calls for top-level window lookup (replaces spawning PowerShell) -->
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+            <version>5.13.0</version>
+        </dependency>
+
+        <!-- Datafaker - offline random data, incl. quote providers used for Teams message text -->
+        <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+            <version>1.9.0</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Cucumber Core -->
         <dependency>
@@ -80,6 +133,8 @@
     </dependencies>
 
     <build>
+        <sourceDirectory>src/main</sourceDirectory>
+        <testSourceDirectory>src/test</testSourceDirectory>
         <plugins>
             <!-- Kotlin Maven Plugin to compile Kotlin code -->
             <plugin>
@@ -91,25 +146,11 @@
                         <id>compile</id>
                         <phase>compile</phase>
                         <goals><goal>compile</goal></goals>
-                        <configuration>
-                            <jvmTarget>11</jvmTarget>
-                            <sourceDirs>
-                                <source>src/main/java</source>
-                                <source>src/main/kotlin</source>
-                            </sourceDirs>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>test-compile</id>
                         <phase>test-compile</phase>
                         <goals><goal>test-compile</goal></goals>
-                        <configuration>
-                            <jvmTarget>11</jvmTarget>
-                            <sourceDirs>
-                                <source>src/test/java</source>
-                                <source>src/test/kotlin</source>
-                            </sourceDirs>
-                        </configuration>
                     </execution>
                 </executions>
                 <configuration>
@@ -122,6 +163,16 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M7</version>
+                <configuration>
+                    <includes>
+                        <include>**/${runner}.class</include>
+                    </includes>
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <systemPropertyVariables>
+                        <cucumber.filter.tags>${cucumber.filter.tags}</cucumber.filter.tags>
+                        <Environment>${Environment}</Environment>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>

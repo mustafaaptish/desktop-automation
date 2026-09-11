@@ -1,0 +1,8 @@
+WinAppDriver process terminated early with exit code {exitCode} (0x80004005: E_FAIL).
+This occurs because WinAppDriver lacks administrative privileges to bind to its port.
+To resolve this, please do one of the following:
+  1. Start WinAppDriver manually as Administrator: Open Command Prompt or PowerShell as Administrator and run:
+     "{winAppDriverPath}"
+     Keep it running in the background. The tests will automatically detect it.
+  2. Run your IDE (IntelliJ IDEA) or Terminal as Administrator so programmatically spawned processes are elevated.
+  3. Enable Windows Developer Mode in your Windows Settings (Settings -> For Developers -> Developer Mode = ON).

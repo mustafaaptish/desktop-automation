@@ -1,0 +1,3 @@
+WinAppDriver.exe not found at path: {winAppDriverPath}
+Please ensure Windows Application Driver is installed, then check the winappdriver.path property in props/desktop.properties.
+Download it from https://github.com/microsoft/WinAppDriver/releases
