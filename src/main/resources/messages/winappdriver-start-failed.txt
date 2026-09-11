@@ -1,0 +1,3 @@
+WinAppDriver process terminated early with exit code {exitCode}.
+Logs:
+{logs}

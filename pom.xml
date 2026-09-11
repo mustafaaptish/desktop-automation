@@ -86,6 +86,21 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- JNA - direct Win32 calls for top-level window lookup (replaces spawning PowerShell) -->
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+            <version>5.13.0</version>
+        </dependency>
+
+        <!-- Datafaker - offline random data, incl. quote providers used for Teams message text -->
+        <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+            <version>1.9.0</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Cucumber Core -->
         <dependency>
             <groupId>io.cucumber</groupId>

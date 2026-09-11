@@ -1,6 +1,7 @@
 package insight.hooks
 
 import insight.drivers.DesktopDriver
+import insight.pages.MsTeamsPage
 import insight.steps.BaseStep.Companion.clearSession
 import insight.steps.BaseStep.Companion.session
 import insight.utilities.log.logError
@@ -44,6 +45,7 @@ class Hooks {
             DesktopDriver.closeDriver()
         }
 
+        MsTeamsPage.resetCache() // cached elements belong to the session we just closed
         logInfo("Clearing session for scenario: ${scenario.name}")
         clearSession()
     }

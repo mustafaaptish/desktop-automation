@@ -6,8 +6,20 @@ import io.appium.java_client.windows.WindowsDriver
 import org.openqa.selenium.By
 import org.openqa.selenium.Keys
 import org.openqa.selenium.WebElement
+import org.openqa.selenium.WebDriverException
 
 class MsTeamsPage(private val driver: WindowsDriver<WebElement>) : BasePage(driver) {
+
+    companion object {
+        // Resolving the message box is a full-tree XPath walk over Teams' WebView2 content and is
+        // expensive, so the element is cached across page-object instances and only re-resolved
+        // when it goes stale.
+        private var cachedMessageInput: WebElement? = null
+
+        fun resetCache() {
+            cachedMessageInput = null
+        }
+    }
 
     private val sendButton: By = By.xpath("//*[@Name='Send (Ctrl+Enter)']")
     private val messageInputByName: By = By.xpath("//*[@Name='Type a message']")
@@ -33,34 +45,76 @@ class MsTeamsPage(private val driver: WindowsDriver<WebElement>) : BasePage(driv
     }
 
     fun clickOnMyChat(): MsTeamsPage {
+        resetCache() // the previous chat's input box is gone once we switch chats
         waitForMyChatItem().click()
         logInfo("Clicked on own chat")
-        waitForMessageInput() // wait for chat pane to fully load before returning
+        focusMessageInput() // wait for chat pane to load and put the caret in the box
         return this
     }
 
-    fun typeMessage(message: String): MsTeamsPage {
-        val input = waitForMessageInput()
+    /**
+     * Resolves the message box, clicks it once to give it focus and caches it.
+     * Subsequent calls reuse the cached element, so no further tree walks or clicks are needed.
+     */
+    fun focusMessageInput(): WebElement {
+        val input = messageInput()
         input.click()
-        input.sendKeys(message)
+        return input
+    }
+
+    fun typeMessage(message: String): MsTeamsPage {
+        withInput { it.sendKeys(message.singleLine()) }
         logInfo("Typed message: '$message'")
+        return this
+    }
+
+    /**
+     * Types the message and clears it again in two driver round trips - the fast path used by the
+     * long-running "type random text for N minutes" step.
+     */
+    fun typeAndClearMessage(message: String): MsTeamsPage {
+        withInput {
+            // Clear any existing text first
+            it.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE)
+
+            // Type the message
+            it.sendKeys(message.singleLine())
+
+            // Wait 2 seconds before clearing it
+            Thread.sleep(1500)
+
+            // Select all and delete
+            it.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE)
+        }
         return this
     }
 
     fun sendMessage(): MsTeamsPage {
         click(sendButton)
         logInfo("Sent message")
-        WaitUtils.waitForMilliSec(500) // brief pause to allow Teams to process send before next iteration
         return this
     }
 
     fun clearMessage(): MsTeamsPage {
-        val input = waitForMessageInput()
-        input.click()
-        input.sendKeys(Keys.chord(Keys.CONTROL, "a"))
-        input.sendKeys(Keys.DELETE)
+        withInput { it.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE) }
         logInfo("Cleared message input")
         return this
+    }
+
+    /**
+     * Runs [action] against the cached input, re-resolving and retrying once if the cached element
+     * has gone stale (Teams re-renders the composer on its own from time to time).
+     */
+    private fun <T> withInput(action: (WebElement) -> T): T =
+        try {
+            action(messageInput())
+        } catch (e: WebDriverException) {
+            resetCache()
+            action(focusMessageInput())
+        }
+
+    private fun messageInput(): WebElement = cachedMessageInput ?: waitForMessageInput().also {
+        cachedMessageInput = it
     }
 
     private fun waitForMessageInput(): WebElement {
@@ -70,12 +124,10 @@ class MsTeamsPage(private val driver: WindowsDriver<WebElement>) : BasePage(driv
 
         while (System.currentTimeMillis() < deadline) {
             // Try Name only first - most reliable in WinAppDriver for WebView2 content
-            val byName = findElements(messageInputByName)
-                .firstOrNull { runCatching { it.isEnabled && it.isDisplayed }.getOrDefault(false) }
+            val byName = findElements(messageInputByName).firstOrNull { it.isInteractive() }
             if (byName != null) return byName
 
-            val byId = findElements(messageInputById)
-                .firstOrNull { runCatching { it.isEnabled && it.isDisplayed }.getOrDefault(false) }
+            val byId = findElements(messageInputById).firstOrNull { it.isInteractive() }
             if (byId != null) return byId
 
             WaitUtils.waitForMilliSec(pollMs)
@@ -83,4 +135,10 @@ class MsTeamsPage(private val driver: WindowsDriver<WebElement>) : BasePage(driv
 
         throw NoSuchElementException("Message input box did not appear within ${timeoutSeconds}s")
     }
+
+    /** A newline in the composer sends the message and a tab moves focus, so neither is ever typed. */
+    private fun String.singleLine(): String = replace(Regex("\\s+"), " ").trim()
+
+    private fun WebElement.isInteractive(): Boolean =
+        runCatching { isEnabled && isDisplayed }.getOrDefault(false)
 }

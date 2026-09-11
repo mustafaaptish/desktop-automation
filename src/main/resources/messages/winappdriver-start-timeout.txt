@@ -1,0 +1,3 @@
+WinAppDriver did not respond on {url} within {timeoutMs}ms of being started.
+Logs:
+{logs}
